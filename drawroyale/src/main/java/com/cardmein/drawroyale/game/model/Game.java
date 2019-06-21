@@ -9,6 +9,7 @@ public class Game {
     private Long id;
     private String name;
     private List<Deck> decks = new ArrayList<>();
+    private Shoe shoe = new Shoe();
 
     public Game(String name) {
         this.name = name;
@@ -36,6 +37,10 @@ public class Game {
 
     public List<Deck> getDecks() {
         return Collections.unmodifiableList(decks);
+    }
+
+    public Shoe getShoe() {
+        return shoe;
     }
 
 }

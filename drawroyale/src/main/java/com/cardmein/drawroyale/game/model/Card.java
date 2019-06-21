@@ -2,6 +2,8 @@ package com.cardmein.drawroyale.game.model;
 
 public class Card {
 
+    private static Long CARD_ID_SEQ = 0L;
+
     private Long id;
     private CardSuit suit;
     private CardValue value;
@@ -9,6 +11,7 @@ public class Card {
     public Card(CardSuit suit, CardValue value) {
         this.suit = suit;
         this.value = value;
+        id = ++CARD_ID_SEQ;
     }
 
     public Long getId() {

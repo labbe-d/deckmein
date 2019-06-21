@@ -14,22 +14,22 @@ import org.springframework.stereotype.Component;
 public class PlayerGameResourceAssembler {
 
     public PlayerGameResource convertToPlayerResource(PlayerGame playerGame) {
-        PlayerGameResource gameResource = new PlayerGameResource();
+        PlayerGameResource playerGameResource = new PlayerGameResource();
 
         Link selfLink = linkTo(GameController.class).slash(playerGame.getGame().getId()).slash("players").slash(playerGame.getId()).withSelfRel();
-        gameResource.add(selfLink);
+        playerGameResource.add(selfLink);
 
         Link viewPlayerLink = linkTo(PlayerController.class).slash(playerGame.getPlayer().getId()).withRel("view_player");
-        gameResource.add(viewPlayerLink);
+        playerGameResource.add(viewPlayerLink);
 
         Link removePlayerGameLink = linkTo(GameController.class).slash(playerGame.getGame().getId()).slash("players").slash(playerGame.getId()).withRel("remove_player_game");
-        gameResource.add(removePlayerGameLink);
+        playerGameResource.add(removePlayerGameLink);
 
-        gameResource.setObjectId(playerGame.getId());
-        gameResource.setPlayerId(playerGame.getPlayer().getId());
-        gameResource.setName(playerGame.getPlayer().getName());
+        playerGameResource.setObjectId(playerGame.getId());
+        playerGameResource.setPlayerId(playerGame.getPlayer().getId());
+        playerGameResource.setName(playerGame.getPlayer().getName());
 
-        return gameResource;
+        return playerGameResource;
     }
 
 }

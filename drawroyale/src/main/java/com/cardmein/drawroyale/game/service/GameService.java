@@ -4,15 +4,19 @@ import java.util.List;
 
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
+import com.cardmein.drawroyale.game.model.GameCard;
+import com.cardmein.drawroyale.game.model.GameCardState;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.persistence.DeckRepository;
+import com.cardmein.drawroyale.game.persistence.GameCardRepository;
 import com.cardmein.drawroyale.game.persistence.GameRepository;
 import com.cardmein.drawroyale.game.persistence.PlayerGameRepository;
 import com.cardmein.drawroyale.game.persistence.PlayerRepository;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
 import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
 import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
+import com.cardmein.drawroyale.game.service.shuffle.ObjectShuffler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,9 @@ public class GameService {
 
     @Autowired
     private PlayerGameRepository playerGameRepository;
+
+    @Autowired
+    private GameCardRepository gameCardRepository;
 
     public Long createGame(String name) {
         Game newGame = new Game(name);
@@ -60,6 +67,17 @@ public class GameService {
         }
 
         game.addDeck(deck);
+
+        // Add all cards into Shoe
+        deck.getCards().forEach(c -> {
+            GameCard gameCard = new GameCard();
+            gameCard.setCard(c);
+            gameCard.setState(GameCardState.IN_SHOE);
+
+            gameCard = gameCardRepository.create(gameCard);
+
+            game.getShoe().addCard(gameCard);
+        });
     }
 
     public PlayerGame getPlayerGame(Long playerGameId) {
@@ -96,6 +114,15 @@ public class GameService {
 
     public List<PlayerGame> getAllPlayers(Long gameId) {
         return playerGameRepository.findAllByGame(gameId);
+    }
+
+    public Game shuffleShoe(Long gameId) {
+        Game game = gameRepository.find(gameId);
+
+        ObjectShuffler<GameCard> cardShuffler = new ObjectShuffler<>();
+        game.getShoe().replaceCards(cardShuffler.shuffle(game.getShoe().getCards()));
+
+        return game;
     }
 
 }

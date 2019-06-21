@@ -22,6 +22,9 @@ public class GameResourceAssembler {
     @Autowired
     private PlayerGameResourceAssembler playerGameAssembler;
 
+    @Autowired
+    private ShoeResourceAssembler shoeAssembler;
+
     public GameResource convertToGameResource(Game game, List<PlayerGame> playerGames) {
         GameResource gameResource = new GameResource();
 
@@ -44,6 +47,8 @@ public class GameResourceAssembler {
         playerGames.forEach(p -> {
             gameResource.addPlayer(playerGameAssembler.convertToPlayerResource(p));
         });
+
+        gameResource.setShoe(shoeAssembler.convertToShoeResource(game, game.getShoe()));
 
         return gameResource;
     }

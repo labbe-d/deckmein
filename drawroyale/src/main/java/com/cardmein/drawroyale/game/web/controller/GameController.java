@@ -6,6 +6,7 @@ import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
+import com.cardmein.drawroyale.game.model.ShoeState;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
 import com.cardmein.drawroyale.game.service.PlayerService;
@@ -14,16 +15,19 @@ import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
 import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
 import com.cardmein.drawroyale.game.web.assembler.GameResourceAssembler;
 import com.cardmein.drawroyale.game.web.assembler.PlayerGameResourceAssembler;
+import com.cardmein.drawroyale.game.web.assembler.ShoeResourceAssembler;
 import com.cardmein.drawroyale.game.web.controller.exception.DeckNotFoundException;
 import com.cardmein.drawroyale.game.web.controller.exception.GameNotFoundException;
 import com.cardmein.drawroyale.game.web.controller.exception.InvalidDeckException;
 import com.cardmein.drawroyale.game.web.controller.exception.InvalidPlayerException;
+import com.cardmein.drawroyale.game.web.controller.exception.InvalidShoeStateException;
 import com.cardmein.drawroyale.game.web.controller.exception.PlayerNotFoundException;
 import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
 import com.cardmein.drawroyale.game.web.model.GameAddPlayerResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
+import com.cardmein.drawroyale.game.web.model.ShoeResource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -53,6 +57,9 @@ public class GameController {
 
     @Autowired
     private PlayerGameResourceAssembler playerGameAssembler;
+
+    @Autowired
+    private ShoeResourceAssembler shoeAssembler;
 
     @GetMapping("/{gameId}")
     public GameResource getGame(@PathVariable Long gameId) {
@@ -160,6 +167,22 @@ public class GameController {
         List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
         return gameResourceAssembler.convertToGameResource(game, playerGames);
 
+    }
+
+    @PostMapping(path = "/{gameId}/shoe/state", consumes = MediaType.TEXT_PLAIN_VALUE)
+    public ShoeResource changeShoeState(@PathVariable Long gameId, @RequestBody String newState) {
+        if (!ShoeState.SHUFFLING.name().equals(newState)) {
+            throw new InvalidShoeStateException("Invalid shoe state: " + newState);
+        }
+
+        Game game = gameService.getGame(gameId);
+        if (game == null) {
+            throw new GameNotFoundException();
+        }
+
+        game = gameService.shuffleShoe(gameId);
+
+        return shoeAssembler.convertToShoeResource(game, game.getShoe());
     }
 
 }
