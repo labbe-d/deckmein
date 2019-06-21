@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class GameResourceAssembler {
 
     @Autowired
-    private DeckResourceAssembler deckAssembler;
+    private GameDeckResourceAssembler gameDeckAssembler;
 
     @Autowired
     private PlayerGameResourceAssembler playerGameAssembler;
@@ -41,7 +41,7 @@ public class GameResourceAssembler {
         gameResource.setName(game.getName());
 
         game.getDecks().forEach(d -> {
-            gameResource.addDeck(deckAssembler.convertToDeckResource(d));
+            gameResource.addDeck(gameDeckAssembler.convertToDeckResource(d));
         });
 
         playerGames.forEach(p -> {

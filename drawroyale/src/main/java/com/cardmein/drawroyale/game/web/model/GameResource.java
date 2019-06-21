@@ -10,7 +10,7 @@ public class GameResource extends ResourceSupport {
 
     private Long objectId;
     private String name;
-    private List<DeckResource> decks = new ArrayList<DeckResource>();
+    private List<GameDeckResource> decks = new ArrayList<GameDeckResource>();
     private List<PlayerGameResource> players = new ArrayList<PlayerGameResource>();
     private ShoeResource shoe;
 
@@ -30,11 +30,11 @@ public class GameResource extends ResourceSupport {
         this.name = name;
     }
 
-    public void addDeck(DeckResource deck) {
+    public void addDeck(GameDeckResource deck) {
         decks.add(deck);
     }
 
-    public List<DeckResource> getDecks() {
+    public List<GameDeckResource> getDecks() {
         return Collections.unmodifiableList(decks);
     }
 
