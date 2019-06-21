@@ -1,14 +1,19 @@
 package com.cardmein.drawroyale.game.web.controller;
 
+import java.util.List;
+
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.Player;
+import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
 import com.cardmein.drawroyale.game.service.PlayerService;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
 import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
+import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
 import com.cardmein.drawroyale.game.web.assembler.GameResourceAssembler;
+import com.cardmein.drawroyale.game.web.assembler.PlayerGameResourceAssembler;
 import com.cardmein.drawroyale.game.web.controller.exception.DeckNotFoundException;
 import com.cardmein.drawroyale.game.web.controller.exception.GameNotFoundException;
 import com.cardmein.drawroyale.game.web.controller.exception.InvalidDeckException;
@@ -18,6 +23,7 @@ import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
 import com.cardmein.drawroyale.game.web.model.GameAddPlayerResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
+import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -45,6 +51,9 @@ public class GameController {
     @Autowired
     private GameResourceAssembler gameResourceAssembler;
 
+    @Autowired
+    private PlayerGameResourceAssembler playerGameAssembler;
+
     @GetMapping("/{gameId}")
     public GameResource getGame(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
@@ -52,14 +61,17 @@ public class GameController {
             throw new GameNotFoundException();
         }
 
-        return gameResourceAssembler.convertToGameResource(game);
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+        return gameResourceAssembler.convertToGameResource(game, playerGames);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public GameResource createGame(@RequestBody GameCreateResource createResource) {
         Long gameId = gameService.createGame(createResource.getName());
         Game game = gameService.getGame(gameId);
-        return gameResourceAssembler.convertToGameResource(game);
+
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+        return gameResourceAssembler.convertToGameResource(game, playerGames);
     }
 
     @DeleteMapping("/{gameId}")
@@ -96,12 +108,13 @@ public class GameController {
             throw new InvalidDeckException("Deck already exists in game");
         }
 
-        return gameResourceAssembler.convertToGameResource(game);
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+        return gameResourceAssembler.convertToGameResource(game, playerGames);
     }
 
     @PostMapping(path = "/{gameId}/players", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public GameResource addDeck(@PathVariable Long gameId, @RequestBody GameAddPlayerResource addPlayerResource) {
-        if (addPlayerResource == null || addPlayerResource.getObjectId() == null) {
+    public PlayerGameResource addPlayer(@PathVariable Long gameId, @RequestBody GameAddPlayerResource addPlayerResource) {
+        if (addPlayerResource == null || addPlayerResource.getPlayerId() == null) {
             throw new InvalidPlayerException("No player provided");
         }
 
@@ -110,19 +123,43 @@ public class GameController {
             throw new GameNotFoundException();
         }
 
-        Player player = playerService.getPlayer(addPlayerResource.getObjectId());
+        Player player = playerService.getPlayer(addPlayerResource.getPlayerId());
         if (player == null) {
             throw new PlayerNotFoundException();
         }
 
         try {
-            gameService.addPlayer(game.getId(), player.getId());
+            PlayerGame playerGame = gameService.addPlayer(game.getId(), player.getId());
+            return playerGameAssembler.convertToPlayerResource(playerGame);
 
         } catch (DuplicatePlayerException e) {
             throw new InvalidPlayerException("Player already exists in game");
         }
 
-        return gameResourceAssembler.convertToGameResource(game);
+    }
+
+    @DeleteMapping(path = "/{gameId}/players/{playerGameId}")
+    public GameResource removePlayer(@PathVariable Long gameId, @PathVariable Long playerGameId) {
+        PlayerGame playerGame = gameService.getPlayerGame(playerGameId);
+        if (playerGame == null) {
+            throw new PlayerNotFoundException();
+        }
+
+        if (!playerGame.getGame().getId().equals(gameId)) {
+            throw new GameNotFoundException();
+        }
+
+        try {
+            gameService.removePlayer(playerGame.getGame().getId(), playerGame.getPlayer().getId());
+
+        } catch (PlayerNotInGameException e) {
+            throw new PlayerNotFoundException();
+        }
+
+        Game game = gameService.getGame(gameId);
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+        return gameResourceAssembler.convertToGameResource(game, playerGames);
+
     }
 
 }

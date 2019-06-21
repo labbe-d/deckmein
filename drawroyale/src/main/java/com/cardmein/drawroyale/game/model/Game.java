@@ -8,7 +8,6 @@ public class Game {
 
     private Long id;
     private String name;
-    private List<Player> players = new ArrayList<>();
     private List<Deck> decks = new ArrayList<>();
 
     public Game(String name) {
@@ -29,14 +28,6 @@ public class Game {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void addPlayer(Player player) {
-        players.add(player);
-    }
-
-    public List<Player> getPlayers() {
-        return Collections.unmodifiableList(players);
     }
 
     public void addDeck(Deck deck) {

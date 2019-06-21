@@ -8,18 +8,18 @@ import com.cardmein.drawroyale.game.model.Player;
 import org.springframework.stereotype.Service;
 
 /**
- * Handles persistence of decks in memory.
+ * Handles persistence of players in memory.
  */
 @Service
 public class PlayerRepository {
 
-    private static Long DECK_ID_SEQ = 0L;
+    private static Long PLAYER_ID_SEQ = 0L;
 
     private List<Player> players = new ArrayList<>();
 
     public Player create(Player player) {
         if (player.getId() == null) {
-            player.setId(++DECK_ID_SEQ);
+            player.setId(++PLAYER_ID_SEQ);
         }
 
         players.add(player);

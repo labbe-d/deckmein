@@ -2,7 +2,6 @@ package com.cardmein.drawroyale.game.web.controller;
 
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.service.DeckService;
-import com.cardmein.drawroyale.game.service.GameService;
 import com.cardmein.drawroyale.game.web.assembler.DeckResourceAssembler;
 import com.cardmein.drawroyale.game.web.controller.exception.DeckNotFoundException;
 import com.cardmein.drawroyale.game.web.model.DeckCreateResource;
@@ -20,9 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "decks", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DeckController {
-
-    @Autowired
-    private GameService gameService;
 
     @Autowired
     private DeckService deckService;

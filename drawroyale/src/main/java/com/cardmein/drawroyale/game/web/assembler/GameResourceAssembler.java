@@ -2,7 +2,10 @@ package com.cardmein.drawroyale.game.web.assembler;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+import java.util.List;
+
 import com.cardmein.drawroyale.game.model.Game;
+import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.web.controller.GameController;
 import com.cardmein.drawroyale.game.web.model.GameResource;
 
@@ -16,7 +19,10 @@ public class GameResourceAssembler {
     @Autowired
     private DeckResourceAssembler deckAssembler;
 
-    public GameResource convertToGameResource(Game game) {
+    @Autowired
+    private PlayerGameResourceAssembler playerGameAssembler;
+
+    public GameResource convertToGameResource(Game game, List<PlayerGame> playerGames) {
         GameResource gameResource = new GameResource();
 
         Link selfLink = linkTo(GameController.class).slash(game.getId()).withSelfRel();
@@ -33,6 +39,10 @@ public class GameResourceAssembler {
 
         game.getDecks().forEach(d -> {
             gameResource.addDeck(deckAssembler.convertToDeckResource(d));
+        });
+
+        playerGames.forEach(p -> {
+            gameResource.addPlayer(playerGameAssembler.convertToPlayerResource(p));
         });
 
         return gameResource;

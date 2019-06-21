@@ -11,7 +11,7 @@ public class GameResource extends ResourceSupport {
     private Long objectId;
     private String name;
     private List<DeckResource> decks = new ArrayList<DeckResource>();
-    private List<PlayerResource> players = new ArrayList<PlayerResource>();
+    private List<PlayerGameResource> players = new ArrayList<PlayerGameResource>();
 
     public Long getObjectId() {
         return objectId;
@@ -37,11 +37,11 @@ public class GameResource extends ResourceSupport {
         return Collections.unmodifiableList(decks);
     }
 
-    public void addPlayers(PlayerResource player) {
+    public void addPlayer(PlayerGameResource player) {
         players.add(player);
     }
 
-    public List<PlayerResource> getPlayers() {
+    public List<PlayerGameResource> getPlayers() {
         return Collections.unmodifiableList(players);
     }
 
