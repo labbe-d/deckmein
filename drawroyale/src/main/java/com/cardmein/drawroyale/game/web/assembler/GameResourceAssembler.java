@@ -37,6 +37,9 @@ public class GameResourceAssembler {
         Link addPlayerLink = linkTo(GameController.class).slash(game.getId()).slash("players").withRel("add_player");
         gameResource.add(addPlayerLink);
 
+        Link viewLeaderboardLink = linkTo(GameController.class).slash(game.getId()).slash("leaderboard").withRel("view_leaderboard");
+        gameResource.add(viewLeaderboardLink);
+
         gameResource.setObjectId(game.getId());
         gameResource.setName(game.getName());
 

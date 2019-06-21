@@ -20,9 +20,7 @@ public class StandardDeckBuilder implements DeckBuilder {
         for (CardSuit suit : CardSuit.values()) {
             for (CardValue value : CardValue.values()) {
                 deck.add(new Card(suit, value));
-                break;
             }
-            break;
         }
         return deck;
     }

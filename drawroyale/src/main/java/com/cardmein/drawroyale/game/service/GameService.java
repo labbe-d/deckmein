@@ -1,7 +1,9 @@
 package com.cardmein.drawroyale.game.service;
 
 import java.util.List;
+import java.util.function.ToIntFunction;
 
+import com.cardmein.drawroyale.game.model.CardValue;
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
@@ -144,4 +146,38 @@ public class GameService {
         
     }
 
+    public ToIntFunction<GameCard> getCardScoringFunction(Long gameId) {
+        // There are no game specific scoring rules for now
+        return (c) -> {
+            CardValue value = c.getCard().getValue();
+            if (CardValue.TWO.equals(value)) {
+                return 2;
+            } else if (CardValue.THREE.equals(value)) {
+                return 3;
+            } else if (CardValue.FOUR.equals(value)) {
+                return 4;
+            } else if (CardValue.FIVE.equals(value)) {
+                return 5;
+            } else if (CardValue.SIX.equals(value)) {
+                return 6;
+            } else if (CardValue.SEVEN.equals(value)) {
+                return 7;
+            } else if (CardValue.EIGHT.equals(value)) {
+                return 8;
+            } else if (CardValue.NINE.equals(value)) {
+                return 9;
+            } else if (CardValue.TEN.equals(value)) {
+                return 10;
+            } else if (CardValue.JACK.equals(value)) {
+                return 11;
+            } else if (CardValue.QUEEN.equals(value)) {
+                return 12;
+            } else if (CardValue.KING.equals(value)) {
+                return 13;
+            } else if (CardValue.ACE.equals(value)) {
+                return 1;
+            }
+            return 0;
+        };
+    }
 }

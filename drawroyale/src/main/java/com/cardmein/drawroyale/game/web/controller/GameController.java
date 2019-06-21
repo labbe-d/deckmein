@@ -2,9 +2,11 @@ package com.cardmein.drawroyale.game.web.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToIntFunction;
 
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
+import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.model.PlayerGameState;
@@ -16,6 +18,7 @@ import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
 import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
 import com.cardmein.drawroyale.game.service.exception.EmptyShoeException;
 import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
+import com.cardmein.drawroyale.game.web.assembler.GameLeaderboardResourceAssembler;
 import com.cardmein.drawroyale.game.web.assembler.GameResourceAssembler;
 import com.cardmein.drawroyale.game.web.assembler.PlayerGameResourceAssembler;
 import com.cardmein.drawroyale.game.web.assembler.ShoeResourceAssembler;
@@ -29,8 +32,8 @@ import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
 import com.cardmein.drawroyale.game.web.model.GameAddPlayerResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
+import com.cardmein.drawroyale.game.web.model.GameLeaderboardResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
-import com.cardmein.drawroyale.game.web.model.PlayerGameCardResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
 
@@ -65,6 +68,9 @@ public class GameController {
 
     @Autowired
     private ShoeResourceAssembler shoeAssembler;
+
+    @Autowired
+    private GameLeaderboardResourceAssembler leaderboardAssembler;
 
     @GetMapping("/{gameId}")
     public GameResource getGame(@PathVariable Long gameId) {
@@ -237,6 +243,21 @@ public class GameController {
         game = gameService.shuffleShoe(gameId);
 
         return shoeAssembler.convertToShoeResource(game, game.getShoe());
+    }
+
+    @GetMapping(path = "/{gameId}/leaderboard")
+    public GameLeaderboardResource getLeaderboard(@PathVariable Long gameId) {
+        Game game = gameService.getGame(gameId);
+        if (game == null) {
+            throw new GameNotFoundException();
+        }
+
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+
+        ToIntFunction<GameCard> scoringFn = gameService.getCardScoringFunction(gameId);
+
+        return leaderboardAssembler.convertToGameResource(game, playerGames, scoringFn);
+
     }
 
 }
