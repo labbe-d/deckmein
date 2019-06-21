@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class DeckRepository {
 
-    private static Long DECK_ID_SEQ = 1L;
+    private static Long DECK_ID_SEQ = 0L;
 
     private List<Deck> decks = new ArrayList<>();
 
     public Deck create(Deck deck) {
         if (deck.getId() == null) {
-            deck.setId(DECK_ID_SEQ++);
+            deck.setId(++DECK_ID_SEQ);
         }
 
         decks.add(deck);
@@ -33,13 +33,5 @@ public class DeckRepository {
                 .findFirst()
                 .orElse(null);
     }
-
-    public void delete(Long id) {
-        Deck deck = find(id);
-        if (deck != null) {
-            decks.remove(deck);
-        }
-    }
-
 
 }

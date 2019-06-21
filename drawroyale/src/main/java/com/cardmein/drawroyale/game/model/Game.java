@@ -9,6 +9,11 @@ public class Game {
     private Long id;
     private String name;
     private List<Player> players = new ArrayList<>();
+    private List<Deck> decks = new ArrayList<>();
+
+    public Game(String name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -32,6 +37,14 @@ public class Game {
 
     public List<Player> getPlayers() {
         return Collections.unmodifiableList(players);
+    }
+
+    public void addDeck(Deck deck) {
+        decks.add(deck);
+    }
+
+    public List<Deck> getDecks() {
+        return Collections.unmodifiableList(decks);
     }
 
 }

@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class GameRepository {
 
-    private static Long GAME_ID_SEQ = 1L;
+    private static Long GAME_ID_SEQ = 0L;
 
     private List<Game> games = new ArrayList<>();
 
     public Game create(Game game) {
         if (game.getId() == null) {
-            game.setId(GAME_ID_SEQ++);
+            game.setId(++GAME_ID_SEQ);
         }
 
         games.add(game);
