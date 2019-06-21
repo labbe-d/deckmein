@@ -26,6 +26,9 @@ public class PlayerGameResourceAssembler {
         Link removePlayerGameLink = linkTo(GameController.class).slash(playerGame.getGame().getId()).slash("players").slash(playerGame.getId()).withRel("remove_player_game");
         playerGameResource.add(removePlayerGameLink);
 
+        Link viewHandLink = linkTo(GameController.class).slash(playerGame.getGame().getId()).slash("players").slash(playerGame.getId()).slash("hand").withRel("view_hand");
+        playerGameResource.add(viewHandLink);
+
         Link drawCardLink = linkTo(GameController.class).slash(playerGame.getGame().getId()).slash("players").slash(playerGame.getId()).slash("state").withRel("draw_card");
         playerGameResource.add(drawCardLink);
 

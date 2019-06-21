@@ -1,5 +1,6 @@
 package com.cardmein.drawroyale.game.web.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cardmein.drawroyale.game.model.Deck;
@@ -24,10 +25,12 @@ import com.cardmein.drawroyale.game.web.controller.exception.InvalidDeckExceptio
 import com.cardmein.drawroyale.game.web.controller.exception.InvalidPlayerException;
 import com.cardmein.drawroyale.game.web.controller.exception.InvalidShoeStateException;
 import com.cardmein.drawroyale.game.web.controller.exception.PlayerNotFoundException;
+import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
 import com.cardmein.drawroyale.game.web.model.GameAddPlayerResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
+import com.cardmein.drawroyale.game.web.model.PlayerGameCardResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
 
@@ -194,6 +197,30 @@ public class GameController {
         }
 
         return playerGameAssembler.convertToPlayerResource(playerGame);
+    }
+
+    @GetMapping(path = "/{gameId}/players/{playerGameId}/hand")
+    public List<Card> getPlayerCards(@PathVariable Long gameId, @PathVariable Long playerGameId) {
+        PlayerGame playerGame = gameService.getPlayerGame(playerGameId);
+        if (playerGame == null) {
+            throw new PlayerNotFoundException();
+        }
+
+        if (!playerGame.getGame().getId().equals(gameId)) {
+            throw new GameNotFoundException();
+        }
+
+        List<Card> cardList = new ArrayList<>();
+
+        playerGame.getHand().forEach(c -> {
+            Card card = new Card();
+            card.setObjectId(c.getId());
+            card.setSuit(c.getCard().getSuit());
+            card.setValue(c.getCard().getValue());
+            cardList.add(card);
+        });
+
+        return cardList;
     }
     
     @PostMapping(path = "/{gameId}/shoe/state", consumes = MediaType.TEXT_PLAIN_VALUE)
