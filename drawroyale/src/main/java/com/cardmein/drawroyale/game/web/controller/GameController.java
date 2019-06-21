@@ -6,12 +6,14 @@ import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
+import com.cardmein.drawroyale.game.model.PlayerGameState;
 import com.cardmein.drawroyale.game.model.ShoeState;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
 import com.cardmein.drawroyale.game.service.PlayerService;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
 import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
+import com.cardmein.drawroyale.game.service.exception.EmptyShoeException;
 import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
 import com.cardmein.drawroyale.game.web.assembler.GameResourceAssembler;
 import com.cardmein.drawroyale.game.web.assembler.PlayerGameResourceAssembler;
@@ -169,6 +171,31 @@ public class GameController {
 
     }
 
+    @PostMapping(path = "/{gameId}/players/{playerGameId}/state", consumes = MediaType.TEXT_PLAIN_VALUE)
+    public PlayerGameResource changePlayerState(@PathVariable Long gameId, @PathVariable Long playerGameId, @RequestBody String newState) {
+        if (!PlayerGameState.DRAWING_CARD.name().equals(newState)) {
+            throw new InvalidShoeStateException("Invalid player state: " + newState);
+        }
+
+        PlayerGame playerGame = gameService.getPlayerGame(playerGameId);
+        if (playerGame == null) {
+            throw new PlayerNotFoundException();
+        }
+
+        if (!playerGame.getGame().getId().equals(gameId)) {
+            throw new GameNotFoundException();
+        }
+
+        try {
+            playerGame = gameService.drawPlayerCard(playerGameId);
+
+        } catch (EmptyShoeException e) {
+            throw new InvalidShoeStateException("Unable to draw from empty shoe");
+        }
+
+        return playerGameAssembler.convertToPlayerResource(playerGame);
+    }
+    
     @PostMapping(path = "/{gameId}/shoe/state", consumes = MediaType.TEXT_PLAIN_VALUE)
     public ShoeResource changeShoeState(@PathVariable Long gameId, @RequestBody String newState) {
         if (!ShoeState.SHUFFLING.name().equals(newState)) {

@@ -5,7 +5,7 @@ public class GameCard {
     private Long id;
     private Card card;
     private GameCardState state;
-    private Player owner;
+    private PlayerGame owner;
 
     public Long getId() {
         return id;
@@ -31,11 +31,11 @@ public class GameCard {
         this.state = state;
     }
 
-    public Player getOwner() {
+    public PlayerGame getOwner() {
         return owner;
     }
 
-    public void setOwner(Player owner) {
+    public void setOwner(PlayerGame owner) {
         this.owner = owner;
     }
 }

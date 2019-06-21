@@ -7,9 +7,10 @@ import java.util.List;
 public class PlayerGame {
 
     private Long id;
+    private PlayerGameState state = PlayerGameState.READY;
     private Player player;
     private Game game;
-    private List<Card> hand = new ArrayList<>();
+    private List<GameCard> hand = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -17,6 +18,14 @@ public class PlayerGame {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public PlayerGameState getState() {
+        return state;
+    }
+
+    public void setState(PlayerGameState state) {
+        this.state = state;
     }
 
     public Player getPlayer() {
@@ -35,11 +44,11 @@ public class PlayerGame {
         this.game = game;
     }
 
-    public void addCard(Card card) {
+    public void addCard(GameCard card) {
         hand.add(card);
     }
 
-    public List<Card> getHand() {
+    public List<GameCard> getHand() {
         return Collections.unmodifiableList(hand);
     }
 

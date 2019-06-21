@@ -29,4 +29,14 @@ public class Shoe {
     public void setState(ShoeState state) {
         this.state = state;
     }
+
+    public boolean hasCard() {
+        return cards.size() > 0;
+    }
+
+    public GameCard drawNextCard() {
+        GameCard card = cards.get(0);
+        cards.remove(card);
+        return card;
+    }
 }

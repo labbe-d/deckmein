@@ -8,6 +8,7 @@ import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.GameCardState;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
+import com.cardmein.drawroyale.game.model.Shoe;
 import com.cardmein.drawroyale.game.persistence.DeckRepository;
 import com.cardmein.drawroyale.game.persistence.GameCardRepository;
 import com.cardmein.drawroyale.game.persistence.GameRepository;
@@ -15,6 +16,7 @@ import com.cardmein.drawroyale.game.persistence.PlayerGameRepository;
 import com.cardmein.drawroyale.game.persistence.PlayerRepository;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
 import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
+import com.cardmein.drawroyale.game.service.exception.EmptyShoeException;
 import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
 import com.cardmein.drawroyale.game.service.shuffle.ObjectShuffler;
 
@@ -123,6 +125,23 @@ public class GameService {
         game.getShoe().replaceCards(cardShuffler.shuffle(game.getShoe().getCards()));
 
         return game;
+    }
+
+    public PlayerGame drawPlayerCard(Long playerId) throws EmptyShoeException {
+        PlayerGame playerGame = playerGameRepository.find(playerId);
+        Shoe shoe = playerGame.getGame().getShoe();
+
+        if (!shoe.hasCard()) {
+            throw new EmptyShoeException();
+        }
+
+        GameCard gameCard = shoe.drawNextCard();
+        gameCard.setOwner(playerGame);
+        gameCard.setState(GameCardState.IN_PLAYER_HAND);
+        playerGame.addCard(gameCard);
+
+        return playerGame;
+        
     }
 
 }
