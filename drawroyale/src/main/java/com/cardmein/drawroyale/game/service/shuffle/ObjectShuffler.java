@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
  */
 public class ObjectShuffler<T> {
 
+    /**
+     * Randomly shuffle a list of object into a new list.
+     * @param input List to shuffle
+     * @return Shuffled list
+     */
     public List<T> shuffle(List<T> input) {
         return input.stream()
                 .map(o -> new ShuffleOrder<T>(o, Math.random()))

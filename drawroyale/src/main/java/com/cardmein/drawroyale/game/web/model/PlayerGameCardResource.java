@@ -5,6 +5,9 @@ import com.cardmein.drawroyale.game.model.CardValue;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a card in a player hand
+ */
 public class PlayerGameCardResource extends ResourceSupport {
 
     private Long objectId;

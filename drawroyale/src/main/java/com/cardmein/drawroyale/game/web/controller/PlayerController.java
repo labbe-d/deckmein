@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Handles all REST endpoints related to a player
+ */
 @RestController
 @RequestMapping(path = "players", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PlayerController {
@@ -26,6 +29,11 @@ public class PlayerController {
     @Autowired
     private PlayerResourceAssembler playerResourceAssembler;
 
+    /**
+     * Retreive the state of a player based on its unique identifier
+     * @param playerId Player ID
+     * @return State of the player
+     */
     @GetMapping("/{playerId}")
     public PlayerResource getPlayer(@PathVariable Long playerId) {
         Player player = playerService.getPlayer(playerId);
@@ -35,6 +43,11 @@ public class PlayerController {
         return playerResourceAssembler.convertToPlayerResource(player);
     }
 
+    /**
+     * Create a new player
+     * @param playerCreate Initial state of the player
+     * @return State of the newly created player
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public PlayerResource createDeck(@RequestBody PlayerCreateResource playerCreate) {
         Long playerId = playerService.createPlayer(playerCreate.getName());

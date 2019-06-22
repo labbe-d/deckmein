@@ -7,7 +7,6 @@ import com.cardmein.drawroyale.game.model.CardValue;
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
-import com.cardmein.drawroyale.game.model.GameCardState;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.model.Shoe;
@@ -25,6 +24,9 @@ import com.cardmein.drawroyale.game.service.shuffle.ObjectShuffler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Manages games and gameplay flow.
+ */
 @Service
 public class GameService {
 
@@ -43,16 +45,30 @@ public class GameService {
     @Autowired
     private GameCardRepository gameCardRepository;
 
+    /**
+     * Create and persist a new game with a given name
+     * @param name Game name
+     * @return Persisted game
+     */
     public Long createGame(String name) {
         Game newGame = new Game(name);
         newGame = gameRepository.create(newGame);
         return newGame.getId();
     }
 
+    /**
+     * Retreive a game based on its unique identifier
+     * @param gameId Game ID
+     * @return Game matching the unique identifier
+     */
     public Game getGame(Long gameId) {
         return gameRepository.find(gameId);
     }
 
+    /**
+     * Delete a game based on its unique identifier
+     * @param gameId Game ID
+     */
     public void deleteGame(Long gameId) {
         gameRepository.delete(gameId);
     }
@@ -76,7 +92,6 @@ public class GameService {
         deck.getCards().forEach(c -> {
             GameCard gameCard = new GameCard();
             gameCard.setCard(c);
-            gameCard.setState(GameCardState.IN_SHOE);
 
             gameCard = gameCardRepository.create(gameCard);
 
@@ -84,10 +99,22 @@ public class GameService {
         });
     }
 
+    /**
+     * Retreive a player game participation based on its unique identifier
+     * @param playerGameId Player game participation ID
+     * @return Player game participation matching the unique identifier
+     */
     public PlayerGame getPlayerGame(Long playerGameId) {
         return playerGameRepository.find(playerGameId);
     }
 
+    /**
+     * Create a player game participation in a given game
+     * @param gameId Game ID
+     * @param playerId Player ID
+     * @return Persisted player game participation
+     * @throws DuplicatePlayerException Thrown when a player is already participating in a game
+     */
     public PlayerGame addPlayer(Long gameId, Long playerId) throws DuplicatePlayerException {
         PlayerGame playerGame = playerGameRepository.findByGameAndPlayer(gameId, playerId);
         if (playerGame != null) {
@@ -106,6 +133,12 @@ public class GameService {
 
     }
 
+    /**
+     * Remove a player participation from a game
+     * @param gameId Game ID
+     * @param playerId Player ID
+     * @throws PlayerNotInGameException Thrown when a player is not part of the game
+     */
     public void removePlayer(Long gameId, Long playerId) throws PlayerNotInGameException {
         PlayerGame playerGame = playerGameRepository.findByGameAndPlayer(gameId, playerId);
         if (playerGame == null) {
@@ -116,10 +149,20 @@ public class GameService {
 
     }
 
+    /**
+     * Retreive all player game participations in a game based on its unique identifier
+     * @param gameId Game ID
+     * @return All player game participations in the game
+     */
     public List<PlayerGame> getAllPlayers(Long gameId) {
         return playerGameRepository.findAllByGame(gameId);
     }
 
+    /**
+     * Randomly shuffle remaining cards in a game's shoe
+     * @param gameId Game ID
+     * @return Game with shuffled shoe
+     */
     public Game shuffleShoe(Long gameId) {
         Game game = gameRepository.find(gameId);
 
@@ -129,6 +172,12 @@ public class GameService {
         return game;
     }
 
+    /**
+     * Draw the next card in the shoe and places it in the player's hand
+     * @param playerId Player game participation ID
+     * @return Player game participation with drawn card
+     * @throws EmptyShoeException Thrown when the shoe is empty and has no more card to draw
+     */
     public PlayerGame drawPlayerCard(Long playerId) throws EmptyShoeException {
         PlayerGame playerGame = playerGameRepository.find(playerId);
         Shoe shoe = playerGame.getGame().getShoe();
@@ -139,13 +188,17 @@ public class GameService {
 
         GameCard gameCard = shoe.drawNextCard();
         gameCard.setOwner(playerGame);
-        gameCard.setState(GameCardState.IN_PLAYER_HAND);
         playerGame.addCard(gameCard);
 
         return playerGame;
         
     }
 
+    /**
+     * Returns a function that converts a game card into a numerical value based on the game type
+     * @param gameId Game ID
+     * @return Card scoring function
+     */
     public ToIntFunction<GameCard> getCardScoringFunction(Long gameId) {
         // There are no game specific scoring rules for now
         return (c) -> {

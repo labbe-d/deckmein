@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A game represents objects and state that isn't proprietary to a player, but is required for game flow.
+ */
 public class Game {
 
     private Long id;

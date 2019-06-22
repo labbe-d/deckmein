@@ -13,9 +13,18 @@ import com.cardmein.drawroyale.game.web.model.LeaderboardPlayerGameResource;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Converts a player game participation into a resource with its hand score
+ */
 @Component
 public class LeaderboardPlayerGameResourceAssembler {
 
+    /**
+     * Converts a player game participation into a resource with its hand score based on a scoring function
+     * @param playerGame Player game participation
+     * @param scoringFn Scoring function
+     * @return Converted player game participation
+     */
     public LeaderboardPlayerGameResource convertToPlayerResource(PlayerGame playerGame, ToIntFunction<GameCard> scoringFn) {
         LeaderboardPlayerGameResource playerGameResource = new LeaderboardPlayerGameResource();
 

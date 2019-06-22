@@ -15,6 +15,11 @@ public class PlayerService {
     @Autowired
     private PlayerRepository playerRepository;
 
+    /**
+     * Persist a new player with a given name
+     * @param name Player name
+     * @return Persisted player
+     */
     public Long createPlayer(String name) {
         Player newPlayer = new Player(name);
 
@@ -22,6 +27,11 @@ public class PlayerService {
         return newPlayer.getId();
     }
 
+    /**
+     * Retreive a player based on its unique identifier
+     * @param playerId Player ID
+     * @return Player matching the unique identifier
+     */
     public Player getPlayer(Long playerId) {
         return playerRepository.find(playerId);
     }

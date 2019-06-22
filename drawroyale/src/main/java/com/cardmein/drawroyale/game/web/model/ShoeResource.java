@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a game shoe
+ */
 public class ShoeResource extends ResourceSupport {
 
     private String state;

@@ -1,5 +1,8 @@
 package com.cardmein.drawroyale.game.model;
 
+/**
+ * A card is a unique combination of a suit and a value.
+ */
 public class Card {
 
     private static Long CARD_ID_SEQ = 0L;

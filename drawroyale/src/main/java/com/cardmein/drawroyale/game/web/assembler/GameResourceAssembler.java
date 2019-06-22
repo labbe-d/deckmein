@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Converts a game into a game resource
+ */
 @Component
 public class GameResourceAssembler {
 
@@ -25,6 +28,12 @@ public class GameResourceAssembler {
     @Autowired
     private ShoeResourceAssembler shoeAssembler;
 
+    /**
+     * Converts a game and its players into a resource
+     * @param game Game
+     * @param playerGames Player game participations
+     * @return Converted game resource
+     */
     public GameResource convertToGameResource(Game game, List<PlayerGame> playerGames) {
         GameResource gameResource = new GameResource();
 

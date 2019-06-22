@@ -15,12 +15,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Converts a list of player game participations into a sorted list based on total hand score
+ */
 @Component
 public class GameLeaderboardResourceAssembler {
 
     @Autowired
     private LeaderboardPlayerGameResourceAssembler playerAssembler;
 
+    /**
+     * Converts a list a player game participations into a sorted list using a given scoring function. Players are sorted by score descending.
+     * @param game Game where players participate
+     * @param playerGames Player game participations
+     * @param scoringFn Function converting a game card into a numerical value
+     * @return Sorted list of players by their score
+     */
     public GameLeaderboardResource convertToGameResource(Game game, List<PlayerGame> playerGames, ToIntFunction<GameCard> scoringFn) {
         GameLeaderboardResource leaderboardResource = new GameLeaderboardResource();
 

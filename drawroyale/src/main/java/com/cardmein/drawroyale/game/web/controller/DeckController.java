@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Handles all REST endpoints related to deck management
+ */
 @RestController
 @RequestMapping(path = "decks", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DeckController {
@@ -26,6 +29,11 @@ public class DeckController {
     @Autowired
     private DeckResourceAssembler deckResourceAssembler;
 
+    /**
+     * Retrieved the state of a deck based on its unique identifier
+     * @param deckId Deck ID
+     * @return Current deck state
+     */
     @GetMapping("/{deckId}")
     public DeckResource getDeck(@PathVariable Long deckId) {
         Deck deck = deckService.getDeck(deckId);
@@ -35,6 +43,11 @@ public class DeckController {
         return deckResourceAssembler.convertToDeckResource(deck);
     }
 
+    /**
+     * Create a new deck of cards based on a type
+     * @param deckCreate Deck creation parameter
+     * @return New deck state
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public DeckResource createDeck(@RequestBody DeckCreateResource deckCreate) {
         Long deckId = deckService.createDeck(deckCreate.getDeckType());

@@ -2,6 +2,9 @@ package com.cardmein.drawroyale.game.web.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a player
+ */
 public class PlayerResource extends ResourceSupport {
 
     private Long objectId;

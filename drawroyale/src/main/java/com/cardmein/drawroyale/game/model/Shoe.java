@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Collection of cards that are available to all players during a game. Cards are drawn in sequence and can be shuffled.
+ */
 public class Shoe {
 
     private List<GameCard> cards = new ArrayList<GameCard>();

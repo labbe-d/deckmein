@@ -10,9 +10,17 @@ import com.cardmein.drawroyale.game.web.model.DeckResource;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Assembler for deck resources
+ */
 @Component
 public class DeckResourceAssembler {
   
+    /**
+     * Creates a deck resource based on a deck
+     * @param deck Deck to convert
+     * @return Deck resource
+     */
     public DeckResource convertToDeckResource(Deck deck) {
         DeckResource deckResource = new DeckResource();
 

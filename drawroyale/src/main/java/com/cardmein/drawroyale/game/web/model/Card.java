@@ -3,6 +3,9 @@ package com.cardmein.drawroyale.game.web.model;
 import com.cardmein.drawroyale.game.model.CardSuit;
 import com.cardmein.drawroyale.game.model.CardValue;
 
+/**
+ * RESTful representation of a card
+ */
 public class Card {
 
     private Long objectId;

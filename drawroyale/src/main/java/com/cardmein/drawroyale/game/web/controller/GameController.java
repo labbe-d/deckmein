@@ -52,6 +52,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Handles all REST endpoints related to a game and gameplay
+ */
 @RestController
 @RequestMapping(path = "games", produces = MediaType.APPLICATION_JSON_VALUE)
 public class GameController {
@@ -77,6 +80,11 @@ public class GameController {
     @Autowired
     private GameLeaderboardResourceAssembler leaderboardAssembler;
 
+    /**
+     * Retreive the state of a game based on its unique identifier
+     * @param gameId Game ID
+     * @return State of the game
+     */
     @GetMapping("/{gameId}")
     public GameResource getGame(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
@@ -88,6 +96,11 @@ public class GameController {
         return gameResourceAssembler.convertToGameResource(game, playerGames);
     }
 
+    /**
+     * Create a new game
+     * @param createResource Initial game state
+     * @return State of the created game
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public GameResource createGame(@RequestBody GameCreateResource createResource) {
         Long gameId = gameService.createGame(createResource.getName());
@@ -97,6 +110,10 @@ public class GameController {
         return gameResourceAssembler.convertToGameResource(game, playerGames);
     }
 
+    /**
+     * Delete a game based on its unique identifier
+     * @param gameId Game ID
+     */
     @DeleteMapping("/{gameId}")
     public void deleteGame(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
@@ -108,6 +125,12 @@ public class GameController {
 
     }
 
+    /**
+     * Add a deck to a game
+     * @param gameId Game ID
+     * @param addDeckResource Deck information to add to the game
+     * @return State of the game with the new deck
+     */
     @PostMapping(path = "/{gameId}/decks", consumes = MediaType.APPLICATION_JSON_VALUE)
     public GameResource addDeck(@PathVariable Long gameId, @RequestBody GameAddDeckResource addDeckResource) {
         if (addDeckResource == null || addDeckResource.getObjectId() == null) {
@@ -135,6 +158,12 @@ public class GameController {
         return gameResourceAssembler.convertToGameResource(game, playerGames);
     }
 
+    /**
+     * Add a player game participation to a game
+     * @param gameId Game ID
+     * @param addPlayerResource Player information to add to the game
+     * @return State of the game with the added player
+     */
     @PostMapping(path = "/{gameId}/players", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PlayerGameResource addPlayer(@PathVariable Long gameId, @RequestBody GameAddPlayerResource addPlayerResource) {
         if (addPlayerResource == null || addPlayerResource.getPlayerId() == null) {
@@ -161,6 +190,12 @@ public class GameController {
 
     }
 
+    /**
+     * Remove a player participation from a game based on their unique identifiers
+     * @param gameId Game ID
+     * @param playerGameId Player game participation ID
+     * @return State of the game with the player removed
+     */
     @DeleteMapping(path = "/{gameId}/players/{playerGameId}")
     public GameResource removePlayer(@PathVariable Long gameId, @PathVariable Long playerGameId) {
         PlayerGame playerGame = gameService.getPlayerGame(playerGameId);
@@ -185,6 +220,13 @@ public class GameController {
 
     }
 
+    /**
+     * Change the player game participation state to initiate actions
+     * @param gameId Game ID
+     * @param playerGameId Player game participation ID
+     * @param newState State corresponding to the action to take
+     * @return State of the player game participation after executing the action
+     */
     @PostMapping(path = "/{gameId}/players/{playerGameId}/state", consumes = MediaType.TEXT_PLAIN_VALUE)
     public PlayerGameResource changePlayerState(@PathVariable Long gameId, @PathVariable Long playerGameId, @RequestBody String newState) {
         if (!PlayerGameState.DRAWING_CARD.name().equals(newState)) {
@@ -210,6 +252,12 @@ public class GameController {
         return playerGameAssembler.convertToPlayerResource(playerGame);
     }
 
+    /**
+     * Retreive the hand of a player in a game
+     * @param gameId Game ID
+     * @param playerGameId Player ID
+     * @return State of the player hand in the game
+     */
     @GetMapping(path = "/{gameId}/players/{playerGameId}/hand")
     public List<Card> getPlayerCards(@PathVariable Long gameId, @PathVariable Long playerGameId) {
         PlayerGame playerGame = gameService.getPlayerGame(playerGameId);
@@ -234,6 +282,12 @@ public class GameController {
         return cardList;
     }
     
+    /**
+     * Change the game shoe state to initiate actions
+     * @param gameId Game ID
+     * @param newState State corresponding to the action to take
+     * @return State of the shoe after executing the action
+     */
     @PostMapping(path = "/{gameId}/shoe/state", consumes = MediaType.TEXT_PLAIN_VALUE)
     public ShoeResource changeShoeState(@PathVariable Long gameId, @RequestBody String newState) {
         if (!ShoeState.SHUFFLING.name().equals(newState)) {
@@ -250,6 +304,11 @@ public class GameController {
         return shoeAssembler.convertToShoeResource(game, game.getShoe());
     }
 
+    /**
+     * Retreive the leaderboard of the game sorted by descending hand score
+     * @param gameId Game ID
+     * @return State of the game's leaderboard
+     */
     @GetMapping(path = "/{gameId}/leaderboard")
     public GameLeaderboardResource getLeaderboard(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
@@ -265,6 +324,11 @@ public class GameController {
 
     }
 
+    /**
+     * Retrieve remaining card count based on suits
+     * @param gameId Game ID
+     * @return Remaining cards per suit
+     */
     @GetMapping(path = "/{gameId}/shoe/stats/suits")
     public List<ShoeSuitCount> getShoeSuitsStats(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
@@ -290,6 +354,11 @@ public class GameController {
 
     }
 
+    /**
+     * Retreive remaining card count based on suit and face value
+     * @param gameId Game ID
+     * @return Remaining cards per suit and face value
+     */
     @GetMapping(path = "/{gameId}/shoe/stats/cards")
     public List<ShoeCardCount> getShoeCardsStats(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);

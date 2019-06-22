@@ -1,10 +1,12 @@
 package com.cardmein.drawroyale.game.model;
 
+/**
+ * Enhanced version of a Card that contains game state and is unique to a game.
+ */
 public class GameCard {
 
     private Long id;
     private Card card;
-    private GameCardState state;
     private PlayerGame owner;
 
     public Long getId() {
@@ -21,14 +23,6 @@ public class GameCard {
 
     public void setCard(Card card) {
         this.card = card;
-    }
-
-    public GameCardState getState() {
-        return state;
-    }
-
-    public void setState(GameCardState state) {
-        this.state = state;
     }
 
     public PlayerGame getOwner() {

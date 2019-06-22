@@ -11,9 +11,17 @@ import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Converts a player game participation into a resource
+ */
 @Component
 public class PlayerGameResourceAssembler {
 
+    /**
+     * Converts a player game participation into a resource
+     * @param playerGame Player game participation
+     * @return Converted resource
+     */
     public PlayerGameResource convertToPlayerResource(PlayerGame playerGame) {
         PlayerGameResource playerGameResource = new PlayerGameResource();
 

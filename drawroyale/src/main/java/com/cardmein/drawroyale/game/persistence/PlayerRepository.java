@@ -17,6 +17,11 @@ public class PlayerRepository {
 
     private List<Player> players = new ArrayList<>();
 
+    /**
+     * Persist a player in memoty
+     * @param player Player to persist
+     * @return Persisted player
+     */
     public Player create(Player player) {
         if (player.getId() == null) {
             player.setId(++PLAYER_ID_SEQ);
@@ -27,6 +32,11 @@ public class PlayerRepository {
         return player;
     }
 
+    /**
+     * Find a player based on its unique identifier
+     * @param id Player ID
+     * @return Player matching the ID
+     */
     public Player find(Long id) {
         return players.stream()
                 .filter(p -> p.getId().equals(id))

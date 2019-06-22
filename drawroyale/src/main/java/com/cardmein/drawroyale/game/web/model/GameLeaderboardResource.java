@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a game's leaderboard based on hand value
+ */
 public class GameLeaderboardResource extends ResourceSupport {
 
     private Long objectId;

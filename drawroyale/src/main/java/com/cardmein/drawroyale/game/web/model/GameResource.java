@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a game
+ */
 public class GameResource extends ResourceSupport {
 
     private Long objectId;

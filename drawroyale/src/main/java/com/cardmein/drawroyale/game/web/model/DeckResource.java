@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a deck of card
+ */
 public class DeckResource extends ResourceSupport {
 
     private Long objectId;

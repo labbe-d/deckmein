@@ -1,5 +1,8 @@
 package com.cardmein.drawroyale.game.web.model;
 
+/**
+ * Configuration used when adding a player to a game
+ */
 public class GameAddPlayerResource {
 
     private Long playerId;

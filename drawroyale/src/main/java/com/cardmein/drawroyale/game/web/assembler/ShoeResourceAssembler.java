@@ -11,9 +11,18 @@ import com.cardmein.drawroyale.game.web.model.ShoeResource;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Converts a game shoe into a resource
+ */
 @Component
 public class ShoeResourceAssembler {
 
+    /**
+     * Converts a game shoe into a resource
+     * @param game Game
+     * @param shoe Shoe
+     * @return Converted shoe
+     */
     public ShoeResource convertToShoeResource(Game game, Shoe shoe) {
         ShoeResource shoeResource = new ShoeResource();
 

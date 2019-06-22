@@ -17,6 +17,11 @@ public class GameCardRepository {
 
     private List<GameCard> gameCards = new ArrayList<>();
 
+    /**
+     * Persist a game card in memory
+     * @param gameCard Game card to persist
+     * @return Persisted game card
+     */
     public GameCard create(GameCard gameCard) {
         if (gameCard.getId() == null) {
             gameCard.setId(++GAME_CARD_ID_SEQ);

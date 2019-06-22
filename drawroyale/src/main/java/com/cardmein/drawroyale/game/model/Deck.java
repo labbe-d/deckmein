@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A deck is a collection of unique cards.
+ */
 public class Deck {
 
     private Long id;

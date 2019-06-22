@@ -9,9 +9,17 @@ import com.cardmein.drawroyale.game.web.model.GameDeckResource;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
+/**
+ * Assembler for game deck resources
+ */
 @Component
 public class GameDeckResourceAssembler {
   
+    /**
+     * Convert a deck into a game deck resource
+     * @param deck Deck to convert
+     * @return Converted resource
+     */
     public GameDeckResource convertToDeckResource(Deck deck) {
         GameDeckResource deckResource = new GameDeckResource();
 

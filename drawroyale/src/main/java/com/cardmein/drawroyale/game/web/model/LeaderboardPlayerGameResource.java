@@ -2,6 +2,9 @@ package com.cardmein.drawroyale.game.web.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
+/**
+ * RESTful representation of a player score in a game leaderboard
+ */
 public class LeaderboardPlayerGameResource extends ResourceSupport {
 
     private Long objectId;

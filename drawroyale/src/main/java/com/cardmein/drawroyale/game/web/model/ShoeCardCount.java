@@ -3,6 +3,9 @@ package com.cardmein.drawroyale.game.web.model;
 import com.cardmein.drawroyale.game.model.CardSuit;
 import com.cardmein.drawroyale.game.model.CardValue;
 
+/**
+ * RESTful representation of the number of cards of a given suit and value in a shoe
+ */
 public class ShoeCardCount {
 
     private CardSuit suit;

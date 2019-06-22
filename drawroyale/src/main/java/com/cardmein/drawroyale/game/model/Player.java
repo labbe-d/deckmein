@@ -1,5 +1,8 @@
 package com.cardmein.drawroyale.game.model;
 
+/**
+ * Person registerd in the system and can participate in games.
+ */
 public class Player {
 
     private Long id;

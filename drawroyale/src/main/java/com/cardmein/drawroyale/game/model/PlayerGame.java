@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Registration of a Player in a given game. Contains data related to the game state.
+ */
 public class PlayerGame {
 
     private Long id;
