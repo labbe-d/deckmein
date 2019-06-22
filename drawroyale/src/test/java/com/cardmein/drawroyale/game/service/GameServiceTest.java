@@ -9,14 +9,18 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.DeckType;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
+import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.model.Shoe;
 import com.cardmein.drawroyale.game.persistence.GameRepository;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
+import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
+import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +40,9 @@ public class GameServiceTest {
 
     @Autowired
     private DeckService deckService;
+
+    @Autowired
+    private PlayerService playerService;
 
     @Test
     public void createdGamePersistedInRepository() {
@@ -163,6 +170,59 @@ public class GameServiceTest {
                 .get();
 
         assertThat(afterShuffleHash, not(beforeShuffleHash));
+    }
+
+    @Test
+    public void addPlayerToGameCreateParticipation() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        gameService.addPlayer(gameId, playerId);
+
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+
+        assertThat(playerGames.size(), is(1));
+        assertThat(playerGames.get(0).getGame().getId(), is(gameId));
+        assertThat(playerGames.get(0).getPlayer().getId(), is(playerId));
+
+    }
+
+    @Test(expected = DuplicatePlayerException.class)
+    public void addExistingPlayerToGameThrows() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        gameService.addPlayer(gameId, playerId);
+        gameService.addPlayer(gameId, playerId);
+
+    }
+
+    @Test
+    public void removeExistingPlayerFromGame() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        gameService.addPlayer(gameId, playerId);
+
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+
+        assertThat(playerGames.size(), is(1));
+
+        gameService.removePlayer(gameId, playerId);
+
+        playerGames = gameService.getAllPlayers(gameId);
+
+        assertThat(playerGames.size(), is(0));
+
+    }
+
+    @Test(expected = PlayerNotInGameException.class)
+    public void removeInexistingPlayerFromGameThrows() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        gameService.removePlayer(gameId, playerId);
+
     }
 
 }

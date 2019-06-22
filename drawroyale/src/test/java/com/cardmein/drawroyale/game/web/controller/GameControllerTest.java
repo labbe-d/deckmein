@@ -7,16 +7,22 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import com.cardmein.drawroyale.game.model.DeckType;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
+import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.model.ShoeState;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
+import com.cardmein.drawroyale.game.service.PlayerService;
 import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
+import com.cardmein.drawroyale.game.web.model.GameAddPlayerResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
+import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
 
 import org.junit.Test;
@@ -33,6 +39,9 @@ public class GameControllerTest extends BaseControllerTest {
 
     @Autowired
     private DeckService deckService;
+
+    @Autowired
+    private PlayerService playerService;
 
     @Test
     public void getExistingGame() {
@@ -154,6 +163,74 @@ public class GameControllerTest extends BaseControllerTest {
 
     }
 
+    @Test
+    public void post1PlayerToGame() {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        GameAddPlayerResource body = new GameAddPlayerResource();
+        body.setPlayerId(playerId);
+        HttpEntity<GameAddPlayerResource> entity = new HttpEntity<GameAddPlayerResource>(body, headers);
+
+        ResponseEntity<PlayerGameResource> response =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players"), HttpMethod.POST, entity, PlayerGameResource.class);
+
+        PlayerGameResource playerGameResource = response.getBody();
+        PlayerGame playerGame = gameService.getPlayerGame(playerGameResource.getObjectId());
+        List<PlayerGame> playerGames = gameService.getAllPlayers(gameId);
+
+        assertThat(playerGames.size(), is(1));
+        assertThat(playerGames.get(0).getPlayer().getId(), is(playerId));
+        validateResourceEqualsModel(playerGameResource, playerGame);
+
+    }
+
+    @Test
+    public void postExistingPlayerToGameFails() {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        GameAddPlayerResource body = new GameAddPlayerResource();
+        body.setPlayerId(playerId);
+        HttpEntity<GameAddPlayerResource> entity = new HttpEntity<GameAddPlayerResource>(body, headers);
+
+        ResponseEntity<String> response =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players"), HttpMethod.POST, entity, String.class);
+
+        response =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players"), HttpMethod.POST, entity, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+        
+    }
+
+    @Test
+    public void deleteExistingPlayerFromGame() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        
+        ResponseEntity<GameResource> response =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerGame.getId()), HttpMethod.DELETE, null, GameResource.class);
+
+        playerGame = gameService.getPlayerGame(playerGame.getId());
+
+        assertThat(playerGame, nullValue());
+    }
+
+    @Test
+    public void deleteInexistingPlayerFromGameFails() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+
+        ResponseEntity<String> response =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/1"), HttpMethod.DELETE, null, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
+
+    }
+
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {
         assertThat(gameResource.getObjectId(), is(game.getId()));
         assertThat(gameResource.getName(), is(game.getName()));
@@ -164,6 +241,11 @@ public class GameControllerTest extends BaseControllerTest {
                 fail("Missing card in shoe suit " + c.getCard().getSuit().name() + " value " + c.getCard().getValue().name());
             }
         });
+    }
+
+    private void validateResourceEqualsModel(PlayerGameResource playerGameResource, PlayerGame playerGame) {
+        assertThat(playerGameResource.getObjectId(), is(playerGame.getId()));
+        assertThat(playerGameResource.getName(), is(playerGame.getPlayer().getName()));
     }
 
     private boolean cardAndResourceEqual(GameCard card, com.cardmein.drawroyale.game.web.model.Card cardResource) {

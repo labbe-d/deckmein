@@ -11,4 +11,8 @@ public class GameAddPlayerResource {
         return playerId;
     }
 
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
 }
