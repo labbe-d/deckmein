@@ -1,14 +1,18 @@
 package com.cardmein.drawroyale.game.web.controller;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.cardmein.drawroyale.game.model.CardSuit;
+import com.cardmein.drawroyale.game.model.CardValue;
 import com.cardmein.drawroyale.game.model.DeckType;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
@@ -287,6 +291,34 @@ public class GameControllerTest extends BaseControllerTest {
             restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerGame.getId() + "/state"), HttpMethod.PUT, drawingEntity, String.class);
 
         assertThat(emptyDrawingResponse.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void getPlayerHand() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deckId);
+
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+
+        List<LinkedHashMap<String, Object>> cardList = new ArrayList<>();
+
+        ResponseEntity<List<LinkedHashMap<String, Object>>> response =
+                (ResponseEntity<List<LinkedHashMap<String, Object>>>) restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerId + "/hand"),
+                        HttpMethod.GET, null, cardList.getClass());
+
+        List<LinkedHashMap<String, Object>> hand = response.getBody();
+
+        // By default, standard deck will generate clubs first starting with 2 and 3
+        assertThat(hand.size(), is(2));
+        assertThat(hand.get(0).get("suit"), is(CardSuit.CLUB.name()));
+        assertThat(hand.get(0).get("value"), is(CardValue.TWO.name()));
+        assertThat(hand.get(1).get("suit"), is(CardSuit.CLUB.name()));
+        assertThat(hand.get(1).get("value"), is(CardValue.THREE.name()));
     }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {
