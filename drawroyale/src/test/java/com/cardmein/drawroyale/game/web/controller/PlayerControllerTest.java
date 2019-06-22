@@ -22,9 +22,6 @@ public class PlayerControllerTest extends BaseControllerTest {
     @Autowired
     private PlayerService playerService;
 
-    TestRestTemplate restTemplate = new TestRestTemplate();
-    HttpHeaders headers = new HttpHeaders();
-
     @Test
     public void getExistingPlayer() {
         Long playerId = playerService.createPlayer("Bob");
@@ -40,7 +37,7 @@ public class PlayerControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void postStandardDeck() {
+    public void postNewPlayer() {
         PlayerCreateResource body = new PlayerCreateResource();
         body.setName("Bob");
         HttpEntity<PlayerCreateResource> entity = new HttpEntity<PlayerCreateResource>(body, headers);
