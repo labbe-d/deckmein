@@ -13,6 +13,8 @@ import com.cardmein.drawroyale.game.model.DeckType;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.PlayerGame;
+import com.cardmein.drawroyale.game.model.PlayerGameState;
+import com.cardmein.drawroyale.game.model.Shoe;
 import com.cardmein.drawroyale.game.model.ShoeState;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
@@ -129,7 +131,7 @@ public class GameControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void postShoeShuffleStateChangesDeckOrder() {
+    public void putShoeShuffleStateChangesDeckOrder() {
         Long gameId = gameService.createGame("Battle Royale");
         Long deckId = deckService.createDeck(DeckType.STANDARD);
 
@@ -229,6 +231,62 @@ public class GameControllerTest extends BaseControllerTest {
 
         assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
 
+    }
+
+    @Test
+    public void putPlayerGameDrawingCardStateDrawsCardFromShoe() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deckId);
+
+        HttpEntity<String> drawingEntity = new HttpEntity<String>(PlayerGameState.DRAWING_CARD.name(), headers);
+        ResponseEntity<PlayerGameResource> drawingResponse =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerGame.getId() + "/state"), HttpMethod.PUT, drawingEntity, PlayerGameResource.class);
+
+        Game game = gameService.getGame(gameId);
+        Shoe shoe = game.getShoe();
+
+        assertThat(drawingResponse.getBody().getHand().size(), is(1));
+        assertThat(shoe.getCards().size(), is(51));
+    }
+
+    @Test
+    public void putPlayerGameDrawingCardStateWithEmptyShoeFails() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deckId);
+
+        Game game = gameService.getGame(gameId);
+        Shoe shoe = game.getShoe();
+
+        int totalCards = shoe.getCards().size();
+
+        HttpEntity<String> drawingEntity = null;
+        ResponseEntity<PlayerGameResource> drawingResponse = null;
+        for (int i = 0; i < totalCards; i++) {
+            drawingEntity = new HttpEntity<String>(PlayerGameState.DRAWING_CARD.name(), headers);
+            drawingResponse =
+                restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerGame.getId() + "/state"), HttpMethod.PUT, drawingEntity, PlayerGameResource.class);
+    
+        }
+
+        game = gameService.getGame(gameId);
+        shoe = game.getShoe();
+
+        assertThat(drawingResponse.getBody().getHand().size(), is(totalCards));
+        assertThat(shoe.getCards().size(), is(0));
+
+        drawingEntity = new HttpEntity<String>(PlayerGameState.DRAWING_CARD.name(), headers);
+        ResponseEntity<String> emptyDrawingResponse =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerGame.getId() + "/state"), HttpMethod.PUT, drawingEntity, String.class);
+
+        assertThat(emptyDrawingResponse.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {

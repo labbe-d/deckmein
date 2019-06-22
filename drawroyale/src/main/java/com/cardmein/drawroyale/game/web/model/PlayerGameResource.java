@@ -57,4 +57,9 @@ public class PlayerGameResource extends ResourceSupport {
         return Collections.unmodifiableList(cards);
     }
 
+    public void setHand(List<Card> cards) {
+        this.cards.clear();
+        this.cards.addAll(cards);
+    }
+
 }

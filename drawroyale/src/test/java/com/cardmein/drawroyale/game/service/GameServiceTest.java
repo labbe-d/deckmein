@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -20,6 +21,7 @@ import com.cardmein.drawroyale.game.model.Shoe;
 import com.cardmein.drawroyale.game.persistence.GameRepository;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
 import com.cardmein.drawroyale.game.service.exception.DuplicatePlayerException;
+import com.cardmein.drawroyale.game.service.exception.EmptyShoeException;
 import com.cardmein.drawroyale.game.service.exception.PlayerNotInGameException;
 
 import org.junit.Test;
@@ -222,6 +224,59 @@ public class GameServiceTest {
         Long playerId = playerService.createPlayer("Bob");
 
         gameService.removePlayer(gameId, playerId);
+
+    }
+
+    @Test
+    public void dealCardToPlayerTransfersCardFromShoeToPlayerHand() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deckId);
+
+        Game game = gameService.getGame(gameId);
+        Shoe shoe = game.getShoe();
+
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+
+        game = gameService.getGame(gameId);
+        shoe = game.getShoe();
+        
+        assertThat(playerGame.getHand().size(), is(1));
+        assertThat(shoe.getCards().size(), is(51));
+
+        Long playerCardId = playerGame.getHand().get(0).getId();
+
+        assertFalse(shoe.getCards().stream().anyMatch(c -> c.getId().equals(playerCardId)));
+
+    }
+
+    @Test(expected = EmptyShoeException.class)
+    public void dealCardToPlayerFromEmptyShoeFails() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deckId);
+
+        Game game = gameService.getGame(gameId);
+        Shoe shoe = game.getShoe();
+
+        int totalCards = shoe.getCards().size();
+        for (int i = 0; i < totalCards; i++) {
+            playerGame = gameService.drawPlayerCard(playerGame.getId());
+        }
+
+        game = gameService.getGame(gameId);
+        shoe = game.getShoe();
+
+        assertThat(shoe.getCards().size(), is(0));
+        assertThat(playerGame.getHand().size(), is(totalCards));
+
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
 
     }
 
