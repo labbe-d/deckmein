@@ -2,6 +2,7 @@ package com.cardmein.drawroyale.game.service;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.cardmein.drawroyale.game.model.Game;
@@ -41,6 +42,20 @@ public class GameServiceTest {
         assertThat(game, notNullValue());
         assertThat(game.getId(), is(gameId));
         assertThat(game.getName(), is("Battle Royale"));
+    }
+
+    @Test
+    public void deletedGameIsRemovedFromRepository() {
+        Long gameId = gameService.createGame("Battle Royale");
+        Game game = gameRepository.find(gameId);
+
+        assertThat(game, notNullValue());
+
+        gameService.deleteGame(gameId);
+        game = gameRepository.find(gameId);
+
+        assertThat(game, nullValue());
+
     }
 
 }

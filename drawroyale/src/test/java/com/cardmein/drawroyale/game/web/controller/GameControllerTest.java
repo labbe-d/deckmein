@@ -2,6 +2,7 @@ package com.cardmein.drawroyale.game.web.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.cardmein.drawroyale.game.model.Game;
@@ -52,6 +53,20 @@ public class GameControllerTest extends BaseControllerTest {
         validateResourceEqualsModel(gameResource, game);
 
     }
+
+    @Test
+    public void deleteGame() {
+        Long gameId = gameService.createGame("Battle Royale");
+        Game game = gameService.getGame(gameId);
+
+        assertThat(game, notNullValue());
+
+        restTemplate.exchange(createURLWithPort("/games/" + gameId), HttpMethod.DELETE, null, Object.class);
+
+        game = gameService.getGame(gameId);
+
+        assertThat(game, nullValue());
+        }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {
         assertThat(gameResource.getObjectId(), is(game.getId()));
