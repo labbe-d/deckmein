@@ -36,6 +36,7 @@ public class DeckServiceTest {
         Long deckId = deckService.createDeck(DeckType.STANDARD);
         Deck deck = deckRepository.find(deckId);
         assertThat(deck, notNullValue());
+        assertThat(deck.getId(), is(deckId));
     }
 
     @Test

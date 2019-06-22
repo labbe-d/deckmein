@@ -13,29 +13,15 @@ import com.cardmein.drawroyale.game.web.model.DeckCreateResource;
 import com.cardmein.drawroyale.game.web.model.DeckResource;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DeckControllerTest {
+public class DeckControllerTest extends BaseControllerTest {
 
-    @LocalServerPort
-    private int port;
-    
     @Autowired
     private DeckService deckService;
-
-    TestRestTemplate restTemplate = new TestRestTemplate();
-    HttpHeaders headers = new HttpHeaders();
 
     @Test
     public void getExistingDeckContainsAllCards() {
@@ -48,7 +34,6 @@ public class DeckControllerTest {
         DeckResource deckResource = response.getBody();
 
         validateResourceEqualsModel(deckResource, deck);
-        
     }
 
     @Test
@@ -71,6 +56,7 @@ public class DeckControllerTest {
     }
 
     private void validateResourceEqualsModel(DeckResource deckResource, Deck deck) {
+        assertThat(deckResource.getObjectId(), is(deck.getId()));
         assertThat(deckResource.getCards().size(), is(deck.getCards().size()));
 
         deck.getCards().forEach(c -> {
@@ -85,10 +71,6 @@ public class DeckControllerTest {
         return card.getId().equals(cardResource.getObjectId()) &&
                 card.getSuit().equals(cardResource.getSuit()) &&
                 card.getValue().equals(cardResource.getValue());
-    }
-
-    private String createURLWithPort(String uri) {
-        return "http://localhost:" + port + uri;
     }
 
 }
