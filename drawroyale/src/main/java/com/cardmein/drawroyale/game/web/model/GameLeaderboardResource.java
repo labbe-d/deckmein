@@ -32,4 +32,9 @@ public class GameLeaderboardResource extends ResourceSupport {
         return Collections.unmodifiableList(players);
     }
 
+    public void setLeaderboard(List<LeaderboardPlayerGameResource> players) {
+        this.players.clear();
+        this.players.addAll(players);
+    }
+
 }

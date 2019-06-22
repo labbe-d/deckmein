@@ -27,7 +27,9 @@ import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
 import com.cardmein.drawroyale.game.web.model.GameAddPlayerResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
+import com.cardmein.drawroyale.game.web.model.GameLeaderboardResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
+import com.cardmein.drawroyale.game.web.model.LeaderboardPlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
 
@@ -319,6 +321,41 @@ public class GameControllerTest extends BaseControllerTest {
         assertThat(hand.get(0).get("value"), is(CardValue.TWO.name()));
         assertThat(hand.get(1).get("suit"), is(CardSuit.CLUB.name()));
         assertThat(hand.get(1).get("value"), is(CardValue.THREE.name()));
+    }
+
+    @Test
+    public void getLeaderboard() throws Exception {
+        // Generate a 2 player game with player 1 drawing 2 and 3 of clubs, then player 2 drawing 4 and 5 of clubs
+        // Player 2 is ranked first with 9 points and player 1 is secon with 5 points
+        Long gameId = gameService.createGame("Battle Royale");
+        Long player1Id = playerService.createPlayer("Bob");
+        Long player2Id = playerService.createPlayer("Jim");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame1 = gameService.addPlayer(gameId, player1Id);
+        PlayerGame playerGame2 = gameService.addPlayer(gameId, player2Id);
+        gameService.addDeck(gameId, deckId);
+
+        playerGame1 = gameService.drawPlayerCard(playerGame1.getId());
+        playerGame1 = gameService.drawPlayerCard(playerGame1.getId());
+
+        playerGame2 = gameService.drawPlayerCard(playerGame2.getId());
+        playerGame2 = gameService.drawPlayerCard(playerGame2.getId());
+
+        ResponseEntity<GameLeaderboardResource> response =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/leaderboard"), HttpMethod.GET, null, GameLeaderboardResource.class);
+
+        GameLeaderboardResource leaderboardResource = response.getBody();
+
+        LeaderboardPlayerGameResource rank1Player = leaderboardResource.getLeaderboard().get(0);
+        LeaderboardPlayerGameResource rank2Player = leaderboardResource.getLeaderboard().get(1);
+        assertThat(rank1Player.getObjectId(), is(playerGame2.getId()));
+        assertThat(rank1Player.getScore(), is(9));
+        assertThat(rank1Player.getName(), is ("Jim"));
+
+        assertThat(rank2Player.getObjectId(), is(playerGame1.getId()));
+        assertThat(rank2Player.getScore(), is(5));
+        assertThat(rank2Player.getName(), is ("Bob"));
     }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {
