@@ -13,4 +13,8 @@ public class DeckCreateResource {
         return deckType;
     }
 
+    public void setDeckType(DeckType deckType) {
+        this.deckType = deckType;
+    }
+
 }
