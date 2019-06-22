@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -356,6 +357,61 @@ public class GameControllerTest extends BaseControllerTest {
         assertThat(rank2Player.getObjectId(), is(playerGame1.getId()));
         assertThat(rank2Player.getScore(), is(5));
         assertThat(rank2Player.getName(), is ("Bob"));
+    }
+
+    @Test
+    public void getShoeStatsRemainingSuits() throws Exception {
+        // Deal the 2 and 3 of clubs to the player
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deckId);
+
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+
+        List<LinkedHashMap<String, Object>> shoeSuitCountList = new ArrayList<>();
+
+        ResponseEntity<List<LinkedHashMap<String, Object>>> response =
+                (ResponseEntity<List<LinkedHashMap<String, Object>>>) restTemplate.exchange(createURLWithPort("/games/" + gameId + "/shoe/stats/suits"),
+                        HttpMethod.GET, null, shoeSuitCountList.getClass());
+
+        List<LinkedHashMap<String, Object>> stats = response.getBody();
+        
+        boolean clubExists = false;
+        boolean diamondExists = false;
+        boolean heartExists = false;
+        boolean spadeExists = false;
+        for (LinkedHashMap<String, Object> stat : stats) {
+            String suit = (String)stat.get("suit");
+            Integer count = (Integer)stat.get("count");
+
+            if (CardSuit.CLUB.name().equals(suit)) {
+                assertThat(count, is(11));
+                clubExists = true;
+
+            } else if (CardSuit.DIAMOND.name().equals(suit)) {
+                assertThat(count, is(13));
+                diamondExists = true;
+
+            } else if (CardSuit.HEART.name().equals(suit)) {
+                assertThat(count, is(13));
+                heartExists = true;
+                
+            } else if (CardSuit.SPADE.name().equals(suit)) {
+                assertThat(count, is(13));
+                spadeExists = true;
+            }
+
+        }
+
+        assertTrue(clubExists);
+        assertTrue(diamondExists);
+        assertTrue(heartExists);
+        assertTrue(spadeExists);
+
     }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {
