@@ -23,6 +23,12 @@ public class ShoeResourceAssembler {
         Link shuffleLink = linkTo(GameController.class).slash(game.getId()).slash("shoe").slash("state").withRel("shuffle");
         shoeResource.add(shuffleLink);
 
+        Link suitStatsLink = linkTo(GameController.class).slash(game.getId()).slash("shoe").slash("stats").slash("suits").withRel("view_suit_statistics");
+        shoeResource.add(suitStatsLink);
+
+        Link cardStatsLink = linkTo(GameController.class).slash(game.getId()).slash("shoe").slash("stats").slash("cards").withRel("view_card_statistics");
+        shoeResource.add(cardStatsLink);
+
         shoeResource.setState(shoe.getState().name());
 
         shoe.getCards().forEach(c -> {
