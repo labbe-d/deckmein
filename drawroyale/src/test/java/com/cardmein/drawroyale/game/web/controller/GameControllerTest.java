@@ -32,7 +32,12 @@ import com.cardmein.drawroyale.game.web.model.GameLeaderboardResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
 import com.cardmein.drawroyale.game.web.model.LeaderboardPlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
+import com.cardmein.drawroyale.game.web.model.PlayerHandResource;
+import com.cardmein.drawroyale.game.web.model.ShoeCardCount;
+import com.cardmein.drawroyale.game.web.model.ShoeCardCountStatsResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
+import com.cardmein.drawroyale.game.web.model.ShoeSuitCount;
+import com.cardmein.drawroyale.game.web.model.ShoeSuitStatsResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -308,20 +313,18 @@ public class GameControllerTest extends BaseControllerTest {
         playerGame = gameService.drawPlayerCard(playerGame.getId());
         playerGame = gameService.drawPlayerCard(playerGame.getId());
 
-        List<LinkedHashMap<String, Object>> cardList = new ArrayList<>();
+        ResponseEntity<PlayerHandResource> response =
+                restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerGame.getId() + "/hand"),
+                        HttpMethod.GET, null, PlayerHandResource.class);
 
-        ResponseEntity<List<LinkedHashMap<String, Object>>> response =
-                (ResponseEntity<List<LinkedHashMap<String, Object>>>) restTemplate.exchange(createURLWithPort("/games/" + gameId + "/players/" + playerId + "/hand"),
-                        HttpMethod.GET, null, cardList.getClass());
-
-        List<LinkedHashMap<String, Object>> hand = response.getBody();
+        PlayerHandResource hand = response.getBody();
 
         // By default, standard deck will generate clubs first starting with 2 and 3
-        assertThat(hand.size(), is(2));
-        assertThat(hand.get(0).get("suit"), is(CardSuit.CLUB.name()));
-        assertThat(hand.get(0).get("value"), is(CardValue.TWO.name()));
-        assertThat(hand.get(1).get("suit"), is(CardSuit.CLUB.name()));
-        assertThat(hand.get(1).get("value"), is(CardValue.THREE.name()));
+        assertThat(hand.getCards().size(), is(2));
+        assertThat(hand.getCards().get(0).getSuit(), is(CardSuit.CLUB));
+        assertThat(hand.getCards().get(0).getValue(), is(CardValue.TWO));
+        assertThat(hand.getCards().get(1).getSuit(), is(CardSuit.CLUB));
+        assertThat(hand.getCards().get(1).getValue(), is(CardValue.THREE));
     }
 
     @Test
@@ -372,36 +375,31 @@ public class GameControllerTest extends BaseControllerTest {
         playerGame = gameService.drawPlayerCard(playerGame.getId());
         playerGame = gameService.drawPlayerCard(playerGame.getId());
 
-        List<LinkedHashMap<String, Object>> shoeSuitCountList = new ArrayList<>();
+        ResponseEntity<ShoeSuitStatsResource> response =
+                restTemplate.exchange(createURLWithPort("/games/" + gameId + "/shoe/stats/suits"),
+                        HttpMethod.GET, null, ShoeSuitStatsResource.class);
 
-        ResponseEntity<List<LinkedHashMap<String, Object>>> response =
-                (ResponseEntity<List<LinkedHashMap<String, Object>>>) restTemplate.exchange(createURLWithPort("/games/" + gameId + "/shoe/stats/suits"),
-                        HttpMethod.GET, null, shoeSuitCountList.getClass());
-
-        List<LinkedHashMap<String, Object>> stats = response.getBody();
+        ShoeSuitStatsResource stats = response.getBody();
         
         boolean clubExists = false;
         boolean diamondExists = false;
         boolean heartExists = false;
         boolean spadeExists = false;
-        for (LinkedHashMap<String, Object> stat : stats) {
-            String suit = (String)stat.get("suit");
-            Integer count = (Integer)stat.get("count");
-
-            if (CardSuit.CLUB.name().equals(suit)) {
-                assertThat(count, is(11));
+        for (ShoeSuitCount count : stats.getSuitCounts()) {
+            if (CardSuit.CLUB.equals(count.getSuit())) {
+                assertThat(count.getCount(), is(11));
                 clubExists = true;
 
-            } else if (CardSuit.DIAMOND.name().equals(suit)) {
-                assertThat(count, is(13));
+            } else if (CardSuit.DIAMOND.equals(count.getSuit())) {
+                assertThat(count.getCount(), is(13));
                 diamondExists = true;
 
-            } else if (CardSuit.HEART.name().equals(suit)) {
-                assertThat(count, is(13));
+            } else if (CardSuit.HEART.equals(count.getSuit())) {
+                assertThat(count.getCount(), is(13));
                 heartExists = true;
                 
-            } else if (CardSuit.SPADE.name().equals(suit)) {
-                assertThat(count, is(13));
+            } else if (CardSuit.SPADE.equals(count.getSuit())) {
+                assertThat(count.getCount(), is(13));
                 spadeExists = true;
             }
 
@@ -412,6 +410,67 @@ public class GameControllerTest extends BaseControllerTest {
         assertTrue(heartExists);
         assertTrue(spadeExists);
 
+    }
+
+    @Test
+    public void getShoeStatsRemainingCards() throws Exception {
+        // Create a game with 2 decks and deal the 2 and 3 of clubs to the player
+        // All cards will have a remaining count of 2 except these 2 cards
+        Long gameId = gameService.createGame("Battle Royale");
+        Long playerId = playerService.createPlayer("Bob");
+        Long deck1Id = deckService.createDeck(DeckType.STANDARD);
+        Long deck2Id = deckService.createDeck(DeckType.STANDARD);
+
+        PlayerGame playerGame = gameService.addPlayer(gameId, playerId);
+        gameService.addDeck(gameId, deck1Id);
+        gameService.addDeck(gameId, deck2Id);
+
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+        playerGame = gameService.drawPlayerCard(playerGame.getId());
+
+        ResponseEntity<ShoeCardCountStatsResource> response =
+                restTemplate.exchange(createURLWithPort("/games/" + gameId + "/shoe/stats/cards"),
+                        HttpMethod.GET, null, ShoeCardCountStatsResource.class);
+
+        ShoeCardCountStatsResource stats = response.getBody();
+
+        // Order should be Hearts, Spades, Clubs then Diamonds, then sorted from King to Ace(1)
+        assertThat(stats.getCardCounts().size(), is(52));
+        
+        ShoeCardCount stat = stats.getCardCounts().get(0);
+        assertThat(stat.getSuit(), is(CardSuit.HEART));
+        assertThat(stat.getValue(), is(CardValue.KING));
+        assertThat(stat.getCount(), is(2));
+        
+        stat = stats.getCardCounts().get(2);
+        assertThat(stat.getSuit(), is(CardSuit.HEART));
+        assertThat(stat.getValue(), is(CardValue.JACK));
+        assertThat(stat.getCount(), is(2));
+        
+        stat = stats.getCardCounts().get(13);
+        assertThat(stat.getSuit(), is(CardSuit.SPADE));
+        assertThat(stat.getValue(), is(CardValue.KING));
+        assertThat(stat.getCount(), is(2));
+        
+        stat = stats.getCardCounts().get(18);
+        assertThat(stat.getSuit(), is(CardSuit.SPADE));
+        assertThat(stat.getValue(), is(CardValue.EIGHT));
+        assertThat(stat.getCount(), is(2));
+        
+        stat = stats.getCardCounts().get(36);
+        assertThat(stat.getSuit(), is(CardSuit.CLUB));
+        assertThat(stat.getValue(), is(CardValue.THREE));
+        assertThat(stat.getCount(), is(1));
+        
+        stat = stats.getCardCounts().get(37);
+        assertThat(stat.getSuit(), is(CardSuit.CLUB));
+        assertThat(stat.getValue(), is(CardValue.TWO));
+        assertThat(stat.getCount(), is(1));
+
+        stat = stats.getCardCounts().get(51);
+        assertThat(stat.getSuit(), is(CardSuit.DIAMOND));
+        assertThat(stat.getValue(), is(CardValue.ACE));
+        assertThat(stat.getCount(), is(2));
     }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {

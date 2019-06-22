@@ -38,9 +38,12 @@ import com.cardmein.drawroyale.game.web.model.GameCreateResource;
 import com.cardmein.drawroyale.game.web.model.GameLeaderboardResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
+import com.cardmein.drawroyale.game.web.model.PlayerHandResource;
 import com.cardmein.drawroyale.game.web.model.ShoeCardCount;
+import com.cardmein.drawroyale.game.web.model.ShoeCardCountStatsResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
 import com.cardmein.drawroyale.game.web.model.ShoeSuitCount;
+import com.cardmein.drawroyale.game.web.model.ShoeSuitStatsResource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -260,7 +263,7 @@ public class GameController {
      * @return State of the player hand in the game
      */
     @GetMapping(path = "/{gameId}/players/{playerGameId}/hand")
-    public List<Card> getPlayerCards(@PathVariable Long gameId, @PathVariable Long playerGameId) {
+    public PlayerHandResource getPlayerCards(@PathVariable Long gameId, @PathVariable Long playerGameId) {
         PlayerGame playerGame = gameService.getPlayerGame(playerGameId);
         if (playerGame == null) {
             throw new PlayerNotFoundException();
@@ -270,17 +273,18 @@ public class GameController {
             throw new GameNotFoundException();
         }
 
-        List<Card> cardList = new ArrayList<>();
+        PlayerHandResource handResource = new PlayerHandResource();
+        handResource.setObjectId(playerGameId);
 
         playerGame.getHand().forEach(c -> {
             Card card = new Card();
             card.setObjectId(c.getId());
             card.setSuit(c.getCard().getSuit());
             card.setValue(c.getCard().getValue());
-            cardList.add(card);
+            handResource.addCard(card);
         });
 
-        return cardList;
+        return handResource;
     }
     
     /**
@@ -331,14 +335,16 @@ public class GameController {
      * @return Remaining cards per suit
      */
     @GetMapping(path = "/{gameId}/shoe/stats/suits")
-    public List<ShoeSuitCount> getShoeSuitsStats(@PathVariable Long gameId) {
+    public ShoeSuitStatsResource getShoeSuitsStats(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
         if (game == null) {
             throw new GameNotFoundException();
         }
 
         Shoe shoe = game.getShoe();
-        List<ShoeSuitCount> suitCounts = new ArrayList<>();
+
+        ShoeSuitStatsResource suitStatsResource = new ShoeSuitStatsResource();
+        suitStatsResource.setObjectId(gameId);
 
         for (CardSuit suit : CardSuit.values()) {
             ShoeSuitCount suitCount = new ShoeSuitCount();
@@ -348,10 +354,10 @@ public class GameController {
                     .count();
             suitCount.setCount((int)count);
 
-            suitCounts.add(suitCount);
+            suitStatsResource.addSuitCount(suitCount);
         }
 
-        return suitCounts;
+        return suitStatsResource;
 
     }
 
@@ -361,14 +367,17 @@ public class GameController {
      * @return Remaining cards per suit and face value
      */
     @GetMapping(path = "/{gameId}/shoe/stats/cards")
-    public List<ShoeCardCount> getShoeCardsStats(@PathVariable Long gameId) {
+    public ShoeCardCountStatsResource getShoeCardsStats(@PathVariable Long gameId) {
         Game game = gameService.getGame(gameId);
         if (game == null) {
             throw new GameNotFoundException();
         }
 
         Shoe shoe = game.getShoe();
-        List<ShoeCardCount> cardCounts = new ArrayList<>();
+        ShoeCardCountStatsResource statResource = new ShoeCardCountStatsResource();
+        statResource.setObjectId(gameId);
+
+        List<ShoeCardCount> cardCounts = new ArrayList<ShoeCardCount>();
 
         for (CardSuit suit : CardSuit.values()) {
             for (CardValue value : CardValue.values()) {
@@ -400,7 +409,9 @@ public class GameController {
             return Integer.compare(c2Value, c1Value);
         });
 
-        return cardCounts;
+        statResource.setCardCounts(cardCounts);
+
+        return statResource;
 
     }
 
