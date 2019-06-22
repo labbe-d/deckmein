@@ -11,4 +11,8 @@ public class GameAddDeckResource {
         return objectId;
     }
 
+    public void setObjectId(Long objectId) {
+        this.objectId = objectId;
+    }
+
 }
