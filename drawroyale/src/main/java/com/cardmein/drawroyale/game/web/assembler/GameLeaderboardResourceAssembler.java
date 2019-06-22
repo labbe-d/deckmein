@@ -10,7 +10,6 @@ import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.web.controller.GameController;
 import com.cardmein.drawroyale.game.web.model.GameLeaderboardResource;
-import com.cardmein.drawroyale.game.web.model.GameResource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;

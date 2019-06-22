@@ -4,7 +4,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.web.controller.DeckController;
-import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.GameDeckResource;
 
 import org.springframework.hateoas.Link;

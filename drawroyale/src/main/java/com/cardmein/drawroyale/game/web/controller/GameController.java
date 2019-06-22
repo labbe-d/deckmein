@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
+import com.cardmein.drawroyale.game.model.CardSuit;
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.Player;
 import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.model.PlayerGameState;
+import com.cardmein.drawroyale.game.model.Shoe;
 import com.cardmein.drawroyale.game.model.ShoeState;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
@@ -36,6 +38,7 @@ import com.cardmein.drawroyale.game.web.model.GameLeaderboardResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
 import com.cardmein.drawroyale.game.web.model.PlayerGameResource;
 import com.cardmein.drawroyale.game.web.model.ShoeResource;
+import com.cardmein.drawroyale.game.web.model.ShoeSuitCount;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -257,6 +260,31 @@ public class GameController {
         ToIntFunction<GameCard> scoringFn = gameService.getCardScoringFunction(gameId);
 
         return leaderboardAssembler.convertToGameResource(game, playerGames, scoringFn);
+
+    }
+
+    @GetMapping(path = "/{gameId}/shoe/stats/suits")
+    public List<ShoeSuitCount> getShoeSuitsStats(@PathVariable Long gameId) {
+        Game game = gameService.getGame(gameId);
+        if (game == null) {
+            throw new GameNotFoundException();
+        }
+
+        Shoe shoe = game.getShoe();
+        List<ShoeSuitCount> suitCounts = new ArrayList<>();
+
+        for (CardSuit suit : CardSuit.values()) {
+            ShoeSuitCount suitCount = new ShoeSuitCount();
+            suitCount.setSuit(suit);
+            long count = shoe.getCards().stream()
+                    .filter(c -> c.getCard().getSuit().equals(suit))
+                    .count();
+            suitCount.setCount((int)count);
+
+            suitCounts.add(suitCount);
+        }
+
+        return suitCounts;
 
     }
 

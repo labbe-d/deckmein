@@ -8,7 +8,6 @@ import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.PlayerGame;
 import com.cardmein.drawroyale.game.web.controller.GameController;
 import com.cardmein.drawroyale.game.web.controller.PlayerController;
-import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.LeaderboardPlayerGameResource;
 
 import org.springframework.hateoas.Link;

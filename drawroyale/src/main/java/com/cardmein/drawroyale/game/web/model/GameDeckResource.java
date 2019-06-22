@@ -1,8 +1,5 @@
 package com.cardmein.drawroyale.game.web.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.hateoas.ResourceSupport;
 
 public class GameDeckResource extends ResourceSupport {
