@@ -3,17 +3,21 @@ package com.cardmein.drawroyale.game.web.controller;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.cardmein.drawroyale.game.model.DeckType;
 import com.cardmein.drawroyale.game.model.Game;
 import com.cardmein.drawroyale.game.model.GameCard;
+import com.cardmein.drawroyale.game.model.ShoeState;
 import com.cardmein.drawroyale.game.service.DeckService;
 import com.cardmein.drawroyale.game.service.GameService;
+import com.cardmein.drawroyale.game.web.model.Card;
 import com.cardmein.drawroyale.game.web.model.GameAddDeckResource;
 import com.cardmein.drawroyale.game.web.model.GameCreateResource;
 import com.cardmein.drawroyale.game.web.model.GameResource;
+import com.cardmein.drawroyale.game.web.model.ShoeResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +117,41 @@ public class GameControllerTest extends BaseControllerTest {
             restTemplate.exchange(createURLWithPort("/games/" + gameId + "/decks"), HttpMethod.POST, entity, String.class);
 
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void postShoeShuffleStateChangesDeckOrder() {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        GameAddDeckResource body = new GameAddDeckResource();
+        body.setObjectId(deckId);
+        HttpEntity<GameAddDeckResource> addDeckEntity = new HttpEntity<GameAddDeckResource>(body, headers);
+
+        ResponseEntity<GameResource> addDeckResponse =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/decks"), HttpMethod.POST, addDeckEntity, GameResource.class);
+
+        ShoeResource shoe = addDeckResponse.getBody().getShoe();
+        long beforeShuffleHash = shoe.getCards().stream()
+                .map(Card::getObjectId)
+                .reduce((x, y) -> x * 31l + y)
+                .get();
+
+        HttpEntity<String> shuffleEntity = new HttpEntity<String>(ShoeState.SHUFFLING.name(), headers);
+        ResponseEntity<ShoeResource> shuffleResponse =
+            restTemplate.exchange(createURLWithPort("/games/" + gameId + "/shoe/state"), HttpMethod.PUT, shuffleEntity, ShoeResource.class);
+        
+        assertThat(shuffleResponse.getStatusCode(), is(HttpStatus.OK));
+
+        shoe = shuffleResponse.getBody();
+
+        long afterShuffleHash = shoe.getCards().stream()
+                .map(Card::getObjectId)
+                .reduce((x, y) -> x * 31l + y)
+                .get();
+
+        assertThat(afterShuffleHash, not(beforeShuffleHash));
+
     }
 
     private void validateResourceEqualsModel(GameResource gameResource, Game game) {

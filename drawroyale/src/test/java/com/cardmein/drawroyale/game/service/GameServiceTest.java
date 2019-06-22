@@ -2,6 +2,7 @@ package com.cardmein.drawroyale.game.service;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import com.cardmein.drawroyale.game.model.Deck;
 import com.cardmein.drawroyale.game.model.DeckType;
 import com.cardmein.drawroyale.game.model.Game;
+import com.cardmein.drawroyale.game.model.GameCard;
 import com.cardmein.drawroyale.game.model.Shoe;
 import com.cardmein.drawroyale.game.persistence.GameRepository;
 import com.cardmein.drawroyale.game.service.exception.DuplicateDeckException;
@@ -134,6 +136,33 @@ public class GameServiceTest {
                 fail("Missing card in shoe suit " + c.getSuit().name() + " value " + c.getValue().name());
             }
         });
+    }
+
+    @Test
+    public void shuffledShoeIsInDifferentOrder() throws Exception {
+        Long gameId = gameService.createGame("Battle Royale");
+        Long deckId = deckService.createDeck(DeckType.STANDARD);
+
+        gameService.addDeck(gameId, deckId);
+
+        Game game = gameService.getGame(gameId);
+        Shoe shoe = game.getShoe();
+        long beforeShuffleHash = shoe.getCards().stream()
+                .map(GameCard::getId)
+                .reduce((x, y) -> x * 31l + y)
+                .get();
+
+        gameService.shuffleShoe(gameId);
+
+        game = gameService.getGame(gameId);
+        shoe = game.getShoe();
+
+        long afterShuffleHash = shoe.getCards().stream()
+                .map(GameCard::getId)
+                .reduce((x, y) -> x * 31l + y)
+                .get();
+
+        assertThat(afterShuffleHash, not(beforeShuffleHash));
     }
 
 }

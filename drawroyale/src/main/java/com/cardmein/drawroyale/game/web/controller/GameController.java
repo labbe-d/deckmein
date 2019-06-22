@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -227,7 +228,7 @@ public class GameController {
      * @param newState State corresponding to the action to take
      * @return State of the player game participation after executing the action
      */
-    @PostMapping(path = "/{gameId}/players/{playerGameId}/state", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @PutMapping(path = "/{gameId}/players/{playerGameId}/state", consumes = MediaType.TEXT_PLAIN_VALUE)
     public PlayerGameResource changePlayerState(@PathVariable Long gameId, @PathVariable Long playerGameId, @RequestBody String newState) {
         if (!PlayerGameState.DRAWING_CARD.name().equals(newState)) {
             throw new InvalidShoeStateException("Invalid player state: " + newState);
@@ -288,7 +289,7 @@ public class GameController {
      * @param newState State corresponding to the action to take
      * @return State of the shoe after executing the action
      */
-    @PostMapping(path = "/{gameId}/shoe/state", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @PutMapping(path = "/{gameId}/shoe/state", consumes = MediaType.TEXT_PLAIN_VALUE)
     public ShoeResource changeShoeState(@PathVariable Long gameId, @RequestBody String newState) {
         if (!ShoeState.SHUFFLING.name().equals(newState)) {
             throw new InvalidShoeStateException("Invalid shoe state: " + newState);
